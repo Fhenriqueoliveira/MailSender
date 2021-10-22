@@ -26,7 +26,6 @@ export class UsersService {
       return this.userRepository.createUser(createUserDto, UserRole.ADMIN);
     }
   }
-
   async findUserById(userId: string): Promise<User> {
     const user = await this.userRepository.findOne(userId, {
       select: ['email', 'name', 'role', 'id'],

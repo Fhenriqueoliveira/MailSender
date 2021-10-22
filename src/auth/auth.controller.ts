@@ -6,6 +6,8 @@ import {
   Get,
   UseGuards,
   Req,
+  Patch,
+  Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dtos/create-user.dto';
@@ -13,6 +15,7 @@ import { CredentialsDto } from 'src/users/dtos/credentials.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'src/users/user.entity';
 import { GetUser } from './get-user.decorator';
+import { ChangePasswordDto } from './change-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -38,5 +41,29 @@ export class AuthController {
   // getMe(@Req() req): User { return req.user}
   getMe(@GetUser() user: User): User {
     return user;
+  }
+  @Patch(':token')
+  async confirmaEmail(@Param('token') token: string) {
+    const user = await this.authService.confirmeEmail(token);
+    return { message: 'Email confirmado' };
+  }
+  @Post('/send-recover-email')
+  async sendRecoverPasswordEmail(
+    @Body('email') email: string,
+  ): Promise<{ message: string }> {
+    await this.authService.sendRecoverPasswordEmail(email);
+    return {
+      message: 'Foi enviado um email com instrucoes para resetar sua senha',
+    };
+  }
+  @Patch('/reset-password/:token')
+  async resetPassword(
+    @Param('token') token: string,
+    @Body(ValidationPipe) changePasswordDto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    await this.authService.resetPassword(token, changePasswordDto);
+    return {
+      message: 'Senha alterada com sucesso',
+    };
   }
 }
